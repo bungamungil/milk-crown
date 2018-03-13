@@ -1,11 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:milk_crown/content/home_drawer_item.dart';
 import 'package:milk_crown/content/explore.dart';
 import 'package:milk_crown/network_call.dart';
+import 'package:milk_crown/common.dart';
 
 class GuestHomePage extends StatefulWidget {
 
@@ -73,7 +72,7 @@ class _GuestHomeState extends State<GuestHomePage> {
         icon: Icons.open_in_browser,
         onTap: () {
           Navigator.of(context).pop();
-          // Todo
+          launch(url: 'https://kitsu.io/');
         },
         isSelected: false,
       ),

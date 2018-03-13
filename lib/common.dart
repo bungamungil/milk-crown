@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
 SliverList createTitle(String title) {
   return new SliverList(
@@ -22,4 +24,10 @@ SliverGridDelegateWithFixedCrossAxisCount defaultGridDelegate() {
     crossAxisCount: 2,
     childAspectRatio: 3 / 4,
   );
+}
+
+launch({@required String url}) async {
+  if (await launcher.canLaunch(url)) {
+    await launcher.launch(url);
+  }
 }
