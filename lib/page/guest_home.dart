@@ -63,7 +63,7 @@ class _GuestHomeState extends State<GuestHomePage> {
         icon: Icons.input,
         onTap: () {
           Navigator.of(context).pop();
-          // Todo
+          Navigator.of(context).pushNamed('/login');
         },
         isSelected: false,
       ),
@@ -96,32 +96,37 @@ class _GuestHomeState extends State<GuestHomePage> {
     });
 
     fetchTrending(client: _connection, mediaType: type).then((response) {
+      if (response == null) return;
       setState(() {
-        _trending = response['data'];
+        _trending = response;
       });
     });
 
     fetchTopCurrent(client: _connection, mediaType: type).then((response) {
+      if (response == null) return;
       setState(() {
-        _topCurrent = response['data'];
+        _topCurrent = response;
       });
     });
 
     fetchTopUpcoming(client: _connection, mediaType: type).then((response) {
+      if (response == null) return;
       setState(() {
-        _topUpcoming = response['data'];
+        _topUpcoming = response;
       });
     });
 
     fetchHighestRated(client: _connection, mediaType: type).then((response) {
+      if (response == null) return;
       setState(() {
-        _highestRated = response['data'];
+        _highestRated = response;
       });
     });
 
     fetchMostPopular(client: _connection, mediaType: type).then((response) {
+      if (response == null) return;
       setState(() {
-        _mostPopular = response['data'];
+        _mostPopular = response;
       });
     });
   }

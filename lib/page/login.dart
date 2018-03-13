@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:milk_crown/network_call.dart';
 
 class LoginPage extends StatefulWidget {
 
@@ -12,40 +13,41 @@ class LoginPage extends StatefulWidget {
 
 class _LoginState extends State<LoginPage> {
 
-  var connection = new http.Client();
+  var _connection = new http.Client();
 
-  var usernameInputController = new TextEditingController();
+  var _usernameInputController = new TextEditingController();
   
-  var passwordInputController = new TextEditingController();
+  var _passwordInputController = new TextEditingController();
 
   @override
   void dispose() {
-    connection.close();
+    _connection.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('Login',
+          style: new TextStyle(fontFamily: 'Itim',),
+        ),
+      ),
       body: new Container(
         decoration: new BoxDecoration(
-          image: new DecorationImage(
-            image: new AssetImage('assets/images/bg_authentication.png'),
-            fit: BoxFit.cover,
-          )
+          color: Colors.brown.shade50
         ),
         child: new Center(
           child: new Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              new Image.asset('assets/images/icon_crown.png'),
               new Padding(
                 padding: new EdgeInsets.fromLTRB(48.0, 12.0, 48.0, 24.0),
-                child: new Text('Milk Crown',
+                child: new Text('Login with your Kitsu.io account',
                   style: new TextStyle(
                     fontFamily: 'Itim',
-                    color: Colors.white,
-                    fontSize: 24.0,
+                    color: Colors.brown,
+                    fontSize: 18.0,
                   ),
                 ),
               ),
@@ -55,7 +57,7 @@ class _LoginState extends State<LoginPage> {
                   children: <Widget>[
                     new Text('Username',
                       style: new TextStyle(
-                        color: Colors.grey,
+                        color: Colors.brown.shade300,
                         fontSize: 12.0,
                         fontFamily: 'Delius',
                       ),
@@ -70,11 +72,11 @@ class _LoginState extends State<LoginPage> {
                     hintText: null,
                   ),
                   style: new TextStyle(
-                    color: Colors.white,
+                    color: Colors.brown,
                     fontSize: 18.0,
                     fontFamily: 'Itim',
                   ),
-                  controller: usernameInputController,
+                  controller: _usernameInputController,
                 ),
               ),
               new Padding(
@@ -82,7 +84,7 @@ class _LoginState extends State<LoginPage> {
                 child: new Container(
                   height: 1.0,
                   decoration: new BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.brown,
                   ),
                 ),
               ),
@@ -92,7 +94,7 @@ class _LoginState extends State<LoginPage> {
                   children: <Widget>[
                     new Text('Password',
                       style: new TextStyle(
-                        color: Colors.grey,
+                        color: Colors.brown.shade300,
                         fontSize: 12.0,
                         fontFamily: 'Delius',
                       ),
@@ -107,11 +109,11 @@ class _LoginState extends State<LoginPage> {
                     hintText: null
                   ),
                   style: new TextStyle(
-                    color: Colors.white,
+                    color: Colors.brown,
                     fontSize: 18.0,
                     fontFamily: 'Itim',
                   ),
-                  controller: passwordInputController,
+                  controller: _passwordInputController,
                 ),
               ),
               new Padding(
@@ -119,7 +121,7 @@ class _LoginState extends State<LoginPage> {
                 child: new Container(
                   height: 1.0,
                   decoration: new BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.brown,
                   ),
                 ),
               ),
@@ -130,7 +132,7 @@ class _LoginState extends State<LoginPage> {
                     padding: new EdgeInsets.fromLTRB(48.0, 12.0, 48.0, 0.0),
                     child: new RaisedButton(
                       onPressed: () {
-                        login(context);
+                        _login(context);
                       },
                       child: new Text('Login',
                         style: new TextStyle(
@@ -151,27 +153,21 @@ class _LoginState extends State<LoginPage> {
     );
   }
 
-  login(context) async {
-    var body = new HashMap<String, String>();
-    body['grant_type'] = 'password';
-    body['client_id'] = 'dd031b32d2f56c990b1425efe6c42ad847e7fe3ab46bf1299f05ecd856bdb7dd';
-    body['client_secret'] = '54d7307928f63414defd96399fc31ba847961ceaecef3a5fd93144e960c0e151';
-    body['username'] = usernameInputController.text;
-    body['password'] = passwordInputController.text;
-    await connection.post('https://kitsu.io/api/oauth/token',
-      body: body,
-    ).then((response) {
+  _login(context) async {
+    login(
+      client: _connection,
+      username: _usernameInputController.text,
+      password: _passwordInputController.text)
+        .then((response) {
       showModalBottomSheet(context: context, builder: (context) {
         return new Container(
           child: new Padding(
             padding: new EdgeInsets.all(20.0),
-            child: new Text(response.body,
+            child: new Text(response,
               style: new TextStyle(fontFamily: 'Delius'),
             ),
           ),
         );
-      }).then((dialog) {
-        print(dialog.runtimeType.toString());
       });
     });
   }
