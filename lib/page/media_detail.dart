@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class MediaDetailPage extends StatelessWidget {
 
@@ -258,19 +259,83 @@ class MediaDetailPage extends StatelessWidget {
           new SliverList(
             delegate: new SliverChildBuilderDelegate((context, index) {
               return new Padding(
-                padding: new EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                padding: new EdgeInsets.fromLTRB(0.0, 6.0, 0.0, 0.0),
                 child: new Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    new Text(synopsis,
-                      style: new TextStyle(
-                        fontFamily: 'Delius',
-                      ),
-                    ),
+                    new _AnimeDetail(field: 'English', value: _englishTitle()),
+                    new _AnimeDetail(field: 'Romanized', value: _romanizedTitle()),
+                    new _AnimeDetail(field: 'Japanese', value: _japaneseTitle()),
+                    new _AnimeDetail(field: 'Runtime Detail', value: _runtimeDetail()),
+                    new _AnimeDetail(field: 'Timeline Detail', value: _timelineDetail()),
+                    new _AnimeDetail(field: 'Rating Guide', value: _ratingGuide()),
+                    new _AnimeDetail(field: 'Synopsis', value: _synopsis()),
                   ],
                 ),
               );
             }, childCount: 1),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Map _attributes() => media['attributes'];
+
+  String _englishTitle() => media['attributes']['titles']['en'];
+
+  String _romanizedTitle() => media['attributes']['titles']['en_jp'];
+
+  String _japaneseTitle() => media['attributes']['titles']['ja_jp'];
+
+  String _synopsis() => media['attributes']['synopsis'];
+
+  String _runtimeDetail() => '${_attributes()['episodeCount']} ${_attributes()['subtype']} episodes @ ${_attributes()['episodeLength']} mins';
+
+  String _timelineDetail() => '${_formatDate(_attributes()['startDate'])} till ${_formatDate(_attributes()['endDate'])}';
+
+  String _ratingGuide() => '${_attributes()['ageRatingGuide']}';
+
+  String _formatDate(String stringDate) {
+    try {
+      var formatter = new DateFormat('yyyy-mm-dd');
+      var date = formatter.parse(stringDate);
+      var readableFormatter = new DateFormat('MMM d, yyyy');
+      return readableFormatter.format(date);
+    } catch (_) { return '?'; }
+  }
+
+}
+
+class _AnimeDetail extends StatelessWidget {
+
+  const _AnimeDetail({@required this.field, @required this.value});
+
+  final String field;
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Padding(
+      padding: new EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
+      child: new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          new Text(field,
+            style: new TextStyle(
+                fontFamily: 'Delius',
+                fontSize: 14.0,
+                fontWeight: FontWeight.w700
+            ),
+          ),
+          new Padding(padding: new EdgeInsets.all(2.0)),
+          new Text(value,
+            style: new TextStyle(
+              fontFamily: 'Delius',
+              color: Colors.black,
+              fontSize: 14.0,
+            ),
           ),
         ],
       ),
