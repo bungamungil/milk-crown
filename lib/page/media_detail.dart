@@ -200,7 +200,6 @@ class _MediaDetailState extends State<MediaDetailPage> {
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.w700
                               ),
-                              textAlign: TextAlign.left,
                             ),
                           ),
                           new _MediaStatisticOverview(
@@ -257,17 +256,83 @@ class _MediaDetailState extends State<MediaDetailPage> {
             delegate: new SliverChildBuilderDelegate((context, index) {
               return new Padding(
                 padding: new EdgeInsets.fromLTRB(0.0, 6.0, 0.0, 0.0),
-                child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    new _MediaDetailItem(field: 'English', value: _englishTitle()),
-                    new _MediaDetailItem(field: 'Romanized', value: _romanizedTitle()),
-                    new _MediaDetailItem(field: 'Japanese', value: _japaneseTitle()),
-                    new _MediaDetailItem(field: 'Runtime Detail', value: _runtimeDetail()),
-                    new _MediaDetailItem(field: 'Timeline Detail', value: _timelineDetail()),
-                    new _MediaDetailItem(field: 'Rating Guide', value: _ratingGuide()),
-                    new _MediaDetailItem(field: 'Synopsis', value: _synopsis()),
-                  ],
+                child: new Material(
+                  elevation: 4.0,
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      new _MediaDetailItem(field: 'English', value: _englishTitle()),
+                      new _MediaDetailItem(field: 'Romanized', value: _romanizedTitle()),
+                      new _MediaDetailItem(field: 'Japanese', value: _japaneseTitle()),
+                      new _MediaDetailItem(field: 'Runtime Detail', value: _runtimeDetail()),
+                      new _MediaDetailItem(field: 'Timeline Detail', value: _timelineDetail()),
+                      new _MediaDetailItem(field: 'Rating Guide', value: _ratingGuide()),
+                      new _MediaDetailItem(field: 'Synopsis', value: _synopsis()),
+                      new Padding(padding: new EdgeInsets.all(4.0)),
+                    ],
+                  ),
+                ),
+              );
+            }, childCount: 1),
+          ),
+          new SliverList(
+            delegate: new SliverChildBuilderDelegate((context, index) {
+              return new Padding(
+                padding: new EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0),
+                child: new Material(
+                  elevation: 4.0,
+                  child: new Column(
+                    children: <Widget>[
+                      new Container(
+                        decoration: new BoxDecoration(
+                            color: Colors.grey
+                        ),
+                        height: 0.3,
+                      ),
+                      new ListTile(
+                        title: new Text('Reviews',
+                          style: new TextStyle(fontFamily: 'Itim', fontSize: 18.0),
+                        ),
+                        onTap: () {},
+                        trailing: new Icon(Icons.chevron_right),
+                      ),
+                      //
+                      new Container(
+                        decoration: new BoxDecoration(
+                            color: Colors.grey
+                        ),
+                        height: 0.3,
+                      ),
+                      new ListTile(
+                        title: new Text('Staffs and Characters',
+                          style: new TextStyle(fontFamily: 'Itim', fontSize: 18.0),
+                        ),
+                        onTap: () {},
+                        trailing: new Icon(Icons.chevron_right),
+                      ),
+                      //
+                      new Container(
+                        decoration: new BoxDecoration(
+                            color: Colors.grey
+                        ),
+                        height: 0.3,
+                      ),
+                      new ListTile(
+                        title: new Text('Franchise',
+                          style: new TextStyle(fontFamily: 'Itim', fontSize: 18.0),
+                        ),
+                        onTap: () {},
+                        trailing: new Icon(Icons.chevron_right),
+                      ),
+                      //
+                      new Container(
+                        decoration: new BoxDecoration(
+                            color: Colors.grey
+                        ),
+                        height: 0.3,
+                      ),
+                    ],
+                  ),
                 ),
               );
             }, childCount: 1),
