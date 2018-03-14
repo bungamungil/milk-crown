@@ -14,6 +14,10 @@ class MediaDetailPage extends StatelessWidget {
     try {
       cover = media['attributes']['coverImage']['original'];
     } catch(_) {}
+    var synopsis = '';
+    try {
+      synopsis = media['attributes']['synopsis'];
+    } catch (_) {}
     return new Scaffold(
       body: new CustomScrollView(
         slivers: <Widget>[
@@ -41,10 +45,6 @@ class MediaDetailPage extends StatelessWidget {
               var title = '';
               try {
                 title = media['attributes']['canonicalTitle'];
-              } catch (_) {}
-              var synopsis = '';
-              try {
-                synopsis = media['attributes']['synopsis'];
               } catch (_) {}
               var averageRating = '';
               try {
@@ -197,6 +197,78 @@ class MediaDetailPage extends StatelessWidget {
                     flex: 4,
                   ),
                 ],
+              );
+            }, childCount: 1),
+          ),
+          new SliverList(
+            delegate: new SliverChildBuilderDelegate((context, index) {
+              return new Padding(padding: new EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 8.0),
+                child: new Row(
+                  children: <Widget>[
+                    new Expanded(
+                      child: new Padding(
+                        padding: new EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),
+                        child: new RaisedButton(
+                          onPressed: () {},
+                          child: new Text('Add to Library',
+                            style: new TextStyle(
+                              fontFamily: 'Itim',
+                              color: Colors.white,
+                            ),
+                          ),
+                          color: Colors.brown,
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      child: new Padding(
+                        padding: new EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),
+                        child: new RaisedButton(
+                          onPressed: () {},
+                          child: new Text('+1 Episode',
+                            style: new TextStyle(
+                              fontFamily: 'Itim',
+                              color: Colors.white,
+                            ),
+                          ),
+                          color: Colors.brown,
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      child: new Padding(
+                        padding: new EdgeInsets.all(0.0),
+                        child: new RaisedButton(
+                          onPressed: () {},
+                          child: new Text('Give Rating',
+                            style: new TextStyle(
+                              fontFamily: 'Itim',
+                              color: Colors.white,
+                            ),
+                          ),
+                          color: Colors.brown,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }, childCount: 1),
+          ),
+          new SliverList(
+            delegate: new SliverChildBuilderDelegate((context, index) {
+              return new Padding(
+                padding: new EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                child: new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    new Text(synopsis,
+                      style: new TextStyle(
+                        fontFamily: 'Delius',
+                      ),
+                    ),
+                  ],
+                ),
               );
             }, childCount: 1),
           ),
