@@ -2,23 +2,158 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class MediaDetailPage extends StatelessWidget {
+class MediaDetailPage extends StatefulWidget {
 
   const MediaDetailPage({@required this.media});
 
   final Map media;
 
   @override
+  State<StatefulWidget> createState() => new _MediaDetailState();
+
+}
+
+class _MediaDetailState extends State<MediaDetailPage> {
+
+  static var formatter = new DateFormat('yyyy-mm-dd');
+
+  static var readableFormatter = new DateFormat('MMM d, yyyy');
+
+  Map _media() => widget.media;
+
+  String _type() {
+    try {
+      var type = _media()['type'];
+      return '${type[0].toUpperCase()}${type.substring(1)}';
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Map _attributes() {
+    try {
+      return _media()['attributes'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _canonicalTitle() {
+    try {
+      return _attributes()['canonicalTitle'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _englishTitle() {
+    try {
+      return _attributes()['titles']['en'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _romanizedTitle() {
+    try {
+      return _attributes()['titles']['en_jp'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _japaneseTitle() {
+    try {
+      return _attributes()['titles']['ja_jp'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _synopsis() {
+    try {
+      return _attributes()['synopsis'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _runtimeDetail() {
+    try {
+      return '${_attributes()['episodeCount']} ${_attributes()['subtype']} episodes @ ${_attributes()['episodeLength']} mins';
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _timelineDetail() {
+    try {
+      return '${_formatDate(_attributes()['startDate'])} till ${_formatDate(_attributes()['endDate'])}';
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _ratingGuide() {
+    try {
+      return '${_attributes()['ageRatingGuide']}';
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _cover() {
+    try {
+      return _attributes()['coverImage']['original'];
+    } catch(_) {
+      return null;
+    }
+  }
+
+  String _poster() {
+    try {
+      return _attributes()['posterImage']['medium'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _averageRating() {
+    try {
+      return _attributes()['averageRating'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  int _popularityRank() {
+    try {
+      return _attributes()['popularityRank'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  int _ratingRank() {
+    try {
+      return _attributes()['ratingRank'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _formatDate(String stringDate) {
+    try {
+      var date = formatter.parse(stringDate);
+      return readableFormatter.format(date);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    var cover;
-    try {
-      cover = media['attributes']['coverImage']['original'];
-    } catch(_) {}
-    var synopsis = '';
-    try {
-      synopsis = media['attributes']['synopsis'];
-    } catch (_) {}
     return new Scaffold(
       body: new CustomScrollView(
         slivers: <Widget>[
@@ -28,9 +163,9 @@ class MediaDetailPage extends StatelessWidget {
             flexibleSpace: new FlexibleSpaceBar(
               background: new FadeInImage(
                 placeholder: new AssetImage('assets/images/placeholder_media.jpg'),
-                image: cover != null
-                  ? new NetworkImage(cover)
-                  : new AssetImage('assets/images/placeholder_media.jpg'),
+                image: _cover() != null
+                    ? new NetworkImage(_cover())
+                    : new AssetImage('assets/images/placeholder_media.jpg'),
                 fit: BoxFit.cover,
                 fadeInDuration: new Duration(milliseconds: 0),
                 fadeOutDuration: new Duration(milliseconds: 0),
@@ -39,30 +174,6 @@ class MediaDetailPage extends StatelessWidget {
           ),
           new SliverList(
             delegate: new SliverChildBuilderDelegate((context, index) {
-              var poster;
-              try {
-                poster = media['attributes']['posterImage']['medium'];
-              } catch (_) {}
-              var title = '';
-              try {
-                title = media['attributes']['canonicalTitle'];
-              } catch (_) {}
-              var averageRating = '';
-              try {
-                averageRating = media['attributes']['averageRating'];
-              } catch (_) {}
-              var popularityRank = '';
-              try {
-                popularityRank = media['attributes']['popularityRank'];
-              } catch (_) {}
-              var type = '';
-              try {
-                type = media['type'];
-              } catch (_) {}
-              var ratingRank = '';
-              try {
-                ratingRank = media['attributes']['ratingRank'];
-              } catch (_) {}
               return new Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -71,7 +182,7 @@ class MediaDetailPage extends StatelessWidget {
                       padding: new EdgeInsets.fromLTRB(16.0, 16.0, 8.0, 16.0),
                       child: new FadeInImage(
                         placeholder: new AssetImage('assets/images/placeholder_media.jpg'),
-                        image: poster != null ? new NetworkImage(poster) : null,
+                        image: _poster() != null ? new NetworkImage(_poster()) : null,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -83,113 +194,32 @@ class MediaDetailPage extends StatelessWidget {
                       child: new Column(
                         children: <Widget>[
                           new Padding(padding: new EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 8.0),
-                            child: new Text(title,
+                            child: new Text(_canonicalTitle(),
                               style: new TextStyle(
-                                fontFamily: 'Delius',
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.w700
+                                  fontFamily: 'Delius',
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.w700
                               ),
                               textAlign: TextAlign.left,
                             ),
                           ),
-                          new Padding(padding: new EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
-                            child: new Row(
-                              children: <Widget>[
-                                new Padding(padding: new EdgeInsets.fromLTRB(4.0, 0.0, 12.0, 0.0),
-                                  child: new IconTheme(
-                                    data: new IconThemeData(
-                                      color: Colors.green,
-                                      size: 24.0,
-                                    ),
-                                    child: new Icon(Icons.people),
-                                  ),
-                                ),
-                                new Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    new Text('$averageRating%',
-                                      style: new TextStyle(
-                                        fontFamily: 'Delius',
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.w700
-                                      ),
-                                    ),
-                                    new Text('Community Approval',
-                                      style: new TextStyle(
-                                        fontFamily: 'Delius',
-                                        fontSize: 12.0
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            )
+                          new _MediaStatisticOverview(
+                            caption: 'Community Approval',
+                            value: '${_averageRating()}%',
+                            icon: Icons.people,
+                            iconColor: Colors.green
                           ),
-                          new Padding(padding: new EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
-                            child: new Row(
-                              children: <Widget>[
-                                new Padding(padding: new EdgeInsets.fromLTRB(4.0, 0.0, 12.0, 0.0),
-                                  child: new IconTheme(
-                                    data: new IconThemeData(
-                                      color: Colors.red,
-                                      size: 24.0,
-                                    ),
-                                    child: new Icon(Icons.favorite),
-                                  ),
-                                ),
-                                new Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    new Text('#$popularityRank',
-                                      style: new TextStyle(
-                                        fontFamily: 'Delius',
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.w700
-                                      ),
-                                    ),
-                                    new Text('Most Popular ${type[0].toUpperCase()}${type.substring(1)}',
-                                      style: new TextStyle(
-                                        fontFamily: 'Delius',
-                                        fontSize: 12.0
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            )
+                          new _MediaStatisticOverview(
+                            caption: 'Most Popular ${_type()}',
+                            value: '#${_popularityRank()}',
+                            icon: Icons.favorite,
+                            iconColor: Colors.red
                           ),
-                          new Padding(padding: new EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
-                            child: new Row(
-                              children: <Widget>[
-                                new Padding(padding: new EdgeInsets.fromLTRB(4.0, 0.0, 12.0, 0.0),
-                                  child: new IconTheme(
-                                    data: new IconThemeData(
-                                      color: Colors.orange,
-                                      size: 24.0
-                                    ),
-                                    child: new Icon(Icons.star),
-                                  ),
-                                ),
-                                new Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    new Text('#$ratingRank',
-                                      style: new TextStyle(
-                                        fontFamily: 'Delius',
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.w700
-                                      ),
-                                    ),
-                                    new Text('Highest Rated ${type[0].toUpperCase()}${type.substring(1)}',
-                                      style: new TextStyle(
-                                        fontFamily: 'Delius',
-                                        fontSize: 12.0
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            )
+                          new _MediaStatisticOverview(
+                            caption: 'Highest Rated ${_type()}',
+                            value: '#${_ratingRank()}',
+                            icon: Icons.star,
+                            iconColor: Colors.orange
                           ),
                         ],
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,50 +236,17 @@ class MediaDetailPage extends StatelessWidget {
               return new Padding(padding: new EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 8.0),
                 child: new Row(
                   children: <Widget>[
-                    new Expanded(
-                      child: new Padding(
-                        padding: new EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),
-                        child: new RaisedButton(
-                          onPressed: () {},
-                          child: new Text('Add to Library',
-                            style: new TextStyle(
-                              fontFamily: 'Itim',
-                              color: Colors.white,
-                            ),
-                          ),
-                          color: Colors.brown,
-                        ),
-                      ),
+                    new _MediaDetailAction(
+                      caption: 'Add to Library',
+                      action: () {},
                     ),
-                    new Expanded(
-                      child: new Padding(
-                        padding: new EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),
-                        child: new RaisedButton(
-                          onPressed: () {},
-                          child: new Text('+1 Episode',
-                            style: new TextStyle(
-                              fontFamily: 'Itim',
-                              color: Colors.white,
-                            ),
-                          ),
-                          color: Colors.brown,
-                        ),
-                      ),
+                    new _MediaDetailAction(
+                      caption: '+1 Episode',
+                      action: () {},
                     ),
-                    new Expanded(
-                      child: new Padding(
-                        padding: new EdgeInsets.all(0.0),
-                        child: new RaisedButton(
-                          onPressed: () {},
-                          child: new Text('Give Rating',
-                            style: new TextStyle(
-                              fontFamily: 'Itim',
-                              color: Colors.white,
-                            ),
-                          ),
-                          color: Colors.brown,
-                        ),
-                      ),
+                    new _MediaDetailAction(
+                      caption: 'Give Rating',
+                      action: () {},
                     ),
                   ],
                 ),
@@ -263,13 +260,13 @@ class MediaDetailPage extends StatelessWidget {
                 child: new Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    new _AnimeDetail(field: 'English', value: _englishTitle()),
-                    new _AnimeDetail(field: 'Romanized', value: _romanizedTitle()),
-                    new _AnimeDetail(field: 'Japanese', value: _japaneseTitle()),
-                    new _AnimeDetail(field: 'Runtime Detail', value: _runtimeDetail()),
-                    new _AnimeDetail(field: 'Timeline Detail', value: _timelineDetail()),
-                    new _AnimeDetail(field: 'Rating Guide', value: _ratingGuide()),
-                    new _AnimeDetail(field: 'Synopsis', value: _synopsis()),
+                    new _MediaDetailItem(field: 'English', value: _englishTitle()),
+                    new _MediaDetailItem(field: 'Romanized', value: _romanizedTitle()),
+                    new _MediaDetailItem(field: 'Japanese', value: _japaneseTitle()),
+                    new _MediaDetailItem(field: 'Runtime Detail', value: _runtimeDetail()),
+                    new _MediaDetailItem(field: 'Timeline Detail', value: _timelineDetail()),
+                    new _MediaDetailItem(field: 'Rating Guide', value: _ratingGuide()),
+                    new _MediaDetailItem(field: 'Synopsis', value: _synopsis()),
                   ],
                 ),
               );
@@ -280,36 +277,94 @@ class MediaDetailPage extends StatelessWidget {
     );
   }
 
-  Map _attributes() => media['attributes'];
+}
 
-  String _englishTitle() => media['attributes']['titles']['en'];
+class _MediaStatisticOverview extends StatelessWidget {
 
-  String _romanizedTitle() => media['attributes']['titles']['en_jp'];
+  const _MediaStatisticOverview({@required this.caption, @required this.value, @required this.icon, @required this.iconColor});
 
-  String _japaneseTitle() => media['attributes']['titles']['ja_jp'];
+  final String caption;
 
-  String _synopsis() => media['attributes']['synopsis'];
+  final String value;
 
-  String _runtimeDetail() => '${_attributes()['episodeCount']} ${_attributes()['subtype']} episodes @ ${_attributes()['episodeLength']} mins';
+  final IconData icon;
 
-  String _timelineDetail() => '${_formatDate(_attributes()['startDate'])} till ${_formatDate(_attributes()['endDate'])}';
+  final Color iconColor;
 
-  String _ratingGuide() => '${_attributes()['ageRatingGuide']}';
-
-  String _formatDate(String stringDate) {
-    try {
-      var formatter = new DateFormat('yyyy-mm-dd');
-      var date = formatter.parse(stringDate);
-      var readableFormatter = new DateFormat('MMM d, yyyy');
-      return readableFormatter.format(date);
-    } catch (_) { return '?'; }
+  @override
+  Widget build(BuildContext context) {
+    return new Padding(padding: new EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
+        child: new Row(
+          children: <Widget>[
+            new Padding(padding: new EdgeInsets.fromLTRB(4.0, 0.0, 12.0, 0.0),
+              child: new IconTheme(
+                data: new IconThemeData(
+                  color: iconColor,
+                  size: 24.0,
+                ),
+                child: new Icon(icon),
+              ),
+            ),
+            new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                new Text(value,
+                  style: new TextStyle(
+                      fontFamily: 'Delius',
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w700
+                  ),
+                ),
+                new Text(caption,
+                  style: new TextStyle(
+                      fontFamily: 'Delius',
+                      fontSize: 12.0
+                  ),
+                ),
+              ],
+            )
+          ],
+        )
+    );
   }
 
 }
 
-class _AnimeDetail extends StatelessWidget {
+class _MediaDetailAction extends StatelessWidget {
 
-  const _AnimeDetail({@required this.field, @required this.value});
+  const _MediaDetailAction({@required this.caption, @required this.action});
+
+  final String caption;
+
+  final dynamic action;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Expanded(
+      child: new Padding(
+        padding: new EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),
+        child: new RaisedButton(
+          onPressed: action,
+          child: new Text(caption,
+            style: new TextStyle(
+              fontFamily: 'Itim',
+              color: Colors.white,
+            ),
+          ),
+          color: Colors.brown,
+          shape: new RoundedRectangleBorder(
+            borderRadius: new BorderRadius.circular(20.0),
+          ),
+        ),
+      ),
+    );
+  }
+
+}
+
+class _MediaDetailItem extends StatelessWidget {
+
+  const _MediaDetailItem({@required this.field, @required this.value});
 
   final String field;
 
