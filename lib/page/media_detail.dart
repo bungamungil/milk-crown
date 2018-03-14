@@ -174,79 +174,82 @@ class _MediaDetailState extends State<MediaDetailPage> {
           ),
           new SliverList(
             delegate: new SliverChildBuilderDelegate((context, index) {
-              return new Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  new Flexible(
-                    child: new Padding(
-                      padding: new EdgeInsets.fromLTRB(16.0, 16.0, 8.0, 16.0),
-                      child: new FadeInImage(
-                        placeholder: new AssetImage('assets/images/placeholder_media.jpg'),
-                        image: _poster() != null ? new NetworkImage(_poster()) : null,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    flex: 3,
-                  ),
-                  new Expanded(
-                    child: new Padding(
-                      padding: new EdgeInsets.fromLTRB(0.0, 16.0, 16.0, 16.0),
-                      child: new Column(
-                        children: <Widget>[
-                          new Padding(padding: new EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 8.0),
-                            child: new Text(_canonicalTitle(),
-                              style: new TextStyle(
-                                  fontFamily: 'Delius',
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w700
-                              ),
+              return new Material(
+                elevation: 4.0,
+                child: new Column(
+                  children: <Widget>[
+                    new Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        new Flexible(
+                          child: new Padding(
+                            padding: new EdgeInsets.fromLTRB(16.0, 16.0, 8.0, 12.0),
+                            child: new FadeInImage(
+                              placeholder: new AssetImage('assets/images/placeholder_media.jpg'),
+                              image: _poster() != null ? new NetworkImage(_poster()) : null,
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          new _MediaStatisticOverview(
-                            caption: 'Community Approval',
-                            value: '${_averageRating()}%',
-                            icon: Icons.people,
-                            iconColor: Colors.green
+                          flex: 3,
+                        ),
+                        new Expanded(
+                          child: new Padding(
+                            padding: new EdgeInsets.fromLTRB(0.0, 16.0, 16.0, 16.0),
+                            child: new Column(
+                              children: <Widget>[
+                                new Padding(padding: new EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 8.0),
+                                  child: new Text(_canonicalTitle(),
+                                    style: new TextStyle(
+                                        fontFamily: 'Delius',
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.w700
+                                    ),
+                                  ),
+                                ),
+                                new _MediaStatisticOverview(
+                                    caption: 'Community Approval',
+                                    value: '${_averageRating()}%',
+                                    icon: Icons.people,
+                                    iconColor: Colors.green
+                                ),
+                                new _MediaStatisticOverview(
+                                    caption: 'Most Popular ${_type()}',
+                                    value: '#${_popularityRank()}',
+                                    icon: Icons.favorite,
+                                    iconColor: Colors.red
+                                ),
+                                new _MediaStatisticOverview(
+                                    caption: 'Highest Rated ${_type()}',
+                                    value: '#${_ratingRank()}',
+                                    icon: Icons.star,
+                                    iconColor: Colors.orange
+                                ),
+                              ],
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                            ),
                           ),
-                          new _MediaStatisticOverview(
-                            caption: 'Most Popular ${_type()}',
-                            value: '#${_popularityRank()}',
-                            icon: Icons.favorite,
-                            iconColor: Colors.red
+                          flex: 4,
+                        ),
+                      ],
+                    ),
+                    new Padding(padding: new EdgeInsets.fromLTRB(18.0, 0.0, 18.0, 18.0),
+                      child: new Row(
+                        children: <Widget>[
+                          new _MediaDetailAction(
+                            caption: 'Add to Library',
+                            action: () {},
                           ),
-                          new _MediaStatisticOverview(
-                            caption: 'Highest Rated ${_type()}',
-                            value: '#${_ratingRank()}',
-                            icon: Icons.star,
-                            iconColor: Colors.orange
+                          new _MediaDetailAction(
+                            caption: '+1 Episode',
+                            action: () {},
+                          ),
+                          new _MediaDetailAction(
+                            caption: 'Give Rating',
+                            action: () {},
                           ),
                         ],
-                        crossAxisAlignment: CrossAxisAlignment.start,
                       ),
-                    ),
-                    flex: 4,
-                  ),
-                ],
-              );
-            }, childCount: 1),
-          ),
-          new SliverList(
-            delegate: new SliverChildBuilderDelegate((context, index) {
-              return new Padding(padding: new EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 8.0),
-                child: new Row(
-                  children: <Widget>[
-                    new _MediaDetailAction(
-                      caption: 'Add to Library',
-                      action: () {},
-                    ),
-                    new _MediaDetailAction(
-                      caption: '+1 Episode',
-                      action: () {},
-                    ),
-                    new _MediaDetailAction(
-                      caption: 'Give Rating',
-                      action: () {},
-                    ),
+                    )
                   ],
                 ),
               );
@@ -255,12 +258,13 @@ class _MediaDetailState extends State<MediaDetailPage> {
           new SliverList(
             delegate: new SliverChildBuilderDelegate((context, index) {
               return new Padding(
-                padding: new EdgeInsets.fromLTRB(0.0, 6.0, 0.0, 0.0),
+                padding: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
                 child: new Material(
                   elevation: 4.0,
                   child: new Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
+                      new Padding(padding: new EdgeInsets.all(4.0)),
                       new _MediaDetailItem(field: 'English', value: _englishTitle()),
                       new _MediaDetailItem(field: 'Romanized', value: _romanizedTitle()),
                       new _MediaDetailItem(field: 'Japanese', value: _japaneseTitle()),
@@ -296,7 +300,6 @@ class _MediaDetailState extends State<MediaDetailPage> {
                         onTap: () {},
                         trailing: new Icon(Icons.chevron_right),
                       ),
-                      //
                       new Container(
                         decoration: new BoxDecoration(
                             color: Colors.grey
@@ -323,13 +326,6 @@ class _MediaDetailState extends State<MediaDetailPage> {
                         ),
                         onTap: () {},
                         trailing: new Icon(Icons.chevron_right),
-                      ),
-                      //
-                      new Container(
-                        decoration: new BoxDecoration(
-                            color: Colors.grey
-                        ),
-                        height: 0.3,
                       ),
                     ],
                   ),
@@ -438,7 +434,7 @@ class _MediaDetailItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Padding(
-      padding: new EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
+      padding: new EdgeInsets.fromLTRB(18.0, 12.0, 18.0, 8.0),
       child: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
