@@ -25,17 +25,33 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   static var readableFormatter = new DateFormat('MMM d, yyyy');
 
+  @override
+  void dispose() {
+    _connection.close();
+    super.dispose();
+  }
+
   Future<Null> _fetchMediaDetail() async {
     try {
       var type = _media()['type'];
       var id = _media()['id'];
-      await _connection.get(Uri.encodeFull('https://kitsu.io/api/edge/$type/$id?include=categories,categories.parent')).then((response) {
+      
+      var uri = Uri.encodeFull('https://kitsu.io/api/edge/$type/$id?include=categories,categories.parent');
+      
+      await _connection.get(uri).then((response) {
+
+        // parse response.body to Json Map
         var parsed = JSON.decode(response.body);
+
         Map attributes = parsed['data']['attributes'];
         List<Map> included = parsed['included'];
+
+        // put all categories from included
         var categories = included.where((it) {
           return it['type'] == 'categories';
         }).toList();
+
+        // chain categories with their parent's
         categories.forEach((category) {
           if (category['relationships']['parent']['data'] != null) {
             category['parent'] = categories.where((it) {
@@ -43,24 +59,81 @@ class _MediaDetailState extends State<MediaDetailPage> {
             }).first;
           }
         });
-        attributes['categories'] = categories.where((category) {
+
+        // put genres (categories with parent.title = Element) from categories
+        attributes['genres'] = categories.where((category) {
           return category['parent'] != null;
         }).where((category) {
           return category['parent']['attributes']['title'] == 'Elements';
         }).toList();
+
+        // put other tags (categories that doesn't have children and doesn't belongs to genres.)
+        attributes['tags'] = categories.where((category) {
+          return category['attributes']['childCount'] == 0;
+        }).where((category) {
+          return category['parent'] != null;
+        }).where((category) {
+          return category['parent']['attributes']['title'] != 'Elements';
+        }).toList();
+
         return attributes;
       }).then((attributes) {
-        List<Map> categories = attributes['categories'];
-        print(categories.length);
-        categories.forEach((category) {
-          print(category['attributes']['title']);
-        });
+        
+        return _fetchReactionCount(attributes);
+
+      }).then((attributes) {
+
+        return _fetchRelationshipCount(attributes);
+        
+      }).then((attributes) {
+
         setState(() {
           _attributes = attributes;
         });
+
       });
     } catch (_) {
     }
+  }
+  
+  Future<Map> _fetchReactionCount(Map attributes) async {
+
+    var type = _media()['type'];
+    var id = _media()['id'];
+    var uri = Uri.encodeFull('https://kitsu.io/api/edge/media-reactions?filter[${type}Id]=$id&sort=-created_at');
+    
+    return await _connection.get(uri).then((response) {
+
+      // parse response.body to Json Map
+      var parsed = JSON.decode(response.body);
+
+      // put reaction count from meta's response
+      int reactionCount = parsed['meta']['count'];
+      attributes['reactionCount'] = reactionCount;
+      return attributes;
+
+    });
+    
+  }
+
+  Future<Map> _fetchRelationshipCount(Map attributes) async {
+
+    var type = _media()['type'];
+    var id = _media()['id'];
+    var uri = Uri.encodeFull('https://kitsu.io/api/edge/$type/$id/media-relationships');
+
+    return await _connection.get(uri).then((response) {
+
+      // parse response.body to Json Map
+      var parsed = JSON.decode(response.body);
+
+      // put relationship count from meta's response
+      int relationshipCount = parsed['meta']['count'];
+      attributes['relationshipCount'] = relationshipCount;
+      return attributes;
+
+    });
+
   }
 
   Map _attributes;
@@ -186,10 +259,42 @@ class _MediaDetailState extends State<MediaDetailPage> {
     }
   }
 
+  List<Map> _genres() {
+    try {
+      return _attributes['genres'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  List<Map> _tags() {
+    try {
+      return _attributes['tags'];
+    } catch(_) {
+      return null;
+    }
+  }
+
   String _formatDate(String stringDate) {
     try {
       var date = formatter.parse(stringDate);
       return readableFormatter.format(date);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  int _reactionCount() {
+    try {
+      return _attributes['reactionCount'];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  int _relationshipCount() {
+    try {
+      return _attributes['relationshipCount'];
     } catch (_) {
       return null;
     }
@@ -325,6 +430,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
                       new _MediaDetailItem(field: 'Timeline Detail', value: _timelineDetail()),
                       new _MediaDetailItem(field: 'Rating Guide', value: _ratingGuide()),
                       new _MediaDetailItem(field: 'Synopsis', value: _synopsis()),
+                      new _MediaTagsDetail(genres: _genres(), tags: _tags(),),
                       new Padding(padding: new EdgeInsets.all(4.0)),
                     ],
                   ),
@@ -347,7 +453,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
                         height: 0.3,
                       ),
                       new ListTile(
-                        title: new Text('Reviews',
+                        title: new Text('Reactions (${_reactionCount()})',
                           style: new TextStyle(fontFamily: 'Itim', fontSize: 18.0),
                         ),
                         onTap: () {},
@@ -374,7 +480,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
                         height: 0.3,
                       ),
                       new ListTile(
-                        title: new Text('Franchise',
+                        title: new Text('Related Media ($_relationshipCount())',
                           style: new TextStyle(fontFamily: 'Itim', fontSize: 18.0),
                         ),
                         onTap: () {},
@@ -505,6 +611,60 @@ class _MediaDetailItem extends StatelessWidget {
               color: Colors.black,
               fontSize: 14.0,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+}
+
+class _MediaTagsDetail extends StatelessWidget {
+  
+  _MediaTagsDetail({@required this.genres, @required this.tags});
+  
+  final List<Map> genres;
+
+  final List<Map> tags;
+  
+  List<Widget> _chips() {
+    var chips = new List<Chip>();
+    genres?.forEach((genre) {
+      chips.add(
+        new Chip(
+          label: new Text(
+            genre['attributes']['title'],
+            style: new TextStyle(fontFamily: 'Itim', color: Colors.white),
+          ),
+          backgroundColor: Colors.brown.shade400,
+        ),
+      );
+    });
+    tags?.forEach((genre) {
+      chips.add(
+        new Chip(
+          label: new Text(
+            genre['attributes']['title'],
+            style: new TextStyle(fontFamily: 'Itim', color: Colors.black),
+          ),
+          backgroundColor: Colors.brown.shade50,
+        ),
+      );
+    });
+    return chips;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Padding(
+      padding: new EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
+      child: new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          new Wrap(
+            spacing: 4.0,
+            runSpacing: 6.0,
+            children: _chips(),
           ),
         ],
       ),
