@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 class MediaDetailPage extends StatefulWidget {
 
@@ -15,9 +19,57 @@ class MediaDetailPage extends StatefulWidget {
 
 class _MediaDetailState extends State<MediaDetailPage> {
 
+  var _connection = new http.Client();
+
   static var formatter = new DateFormat('yyyy-mm-dd');
 
   static var readableFormatter = new DateFormat('MMM d, yyyy');
+
+  Future<Null> _fetchMediaDetail() async {
+    try {
+      var type = _media()['type'];
+      var id = _media()['id'];
+      await _connection.get(Uri.encodeFull('https://kitsu.io/api/edge/$type/$id?include=categories,categories.parent')).then((response) {
+        var parsed = JSON.decode(response.body);
+        Map attributes = parsed['data']['attributes'];
+        List<Map> included = parsed['included'];
+        var categories = included.where((it) {
+          return it['type'] == 'categories';
+        }).toList();
+        categories.forEach((category) {
+          if (category['relationships']['parent']['data'] != null) {
+            category['parent'] = categories.where((it) {
+              return category['relationships']['parent']['data']['id'] == it['id'];
+            }).first;
+          }
+        });
+        attributes['categories'] = categories.where((category) {
+          return category['parent'] != null;
+        }).where((category) {
+          return category['parent']['attributes']['title'] == 'Elements';
+        }).toList();
+        return attributes;
+      }).then((attributes) {
+        List<Map> categories = attributes['categories'];
+        print(categories.length);
+        categories.forEach((category) {
+          print(category['attributes']['title']);
+        });
+        setState(() {
+          _attributes = attributes;
+        });
+      });
+    } catch (_) {
+    }
+  }
+
+  Map _attributes;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMediaDetail();
+  }
 
   Map _media() => widget.media;
 
@@ -30,17 +82,9 @@ class _MediaDetailState extends State<MediaDetailPage> {
     }
   }
 
-  Map _attributes() {
-    try {
-      return _media()['attributes'];
-    } catch (_) {
-      return null;
-    }
-  }
-
   String _canonicalTitle() {
     try {
-      return _attributes()['canonicalTitle'];
+      return _attributes['canonicalTitle'];
     } catch (_) {
       return null;
     }
@@ -48,7 +92,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   String _englishTitle() {
     try {
-      return _attributes()['titles']['en'];
+      return _attributes['titles']['en'];
     } catch (_) {
       return null;
     }
@@ -56,7 +100,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   String _romanizedTitle() {
     try {
-      return _attributes()['titles']['en_jp'];
+      return _attributes['titles']['en_jp'];
     } catch (_) {
       return null;
     }
@@ -64,7 +108,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   String _japaneseTitle() {
     try {
-      return _attributes()['titles']['ja_jp'];
+      return _attributes['titles']['ja_jp'];
     } catch (_) {
       return null;
     }
@@ -72,7 +116,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   String _synopsis() {
     try {
-      return _attributes()['synopsis'];
+      return _attributes['synopsis'];
     } catch (_) {
       return null;
     }
@@ -80,7 +124,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   String _runtimeDetail() {
     try {
-      return '${_attributes()['episodeCount']} ${_attributes()['subtype']} episodes @ ${_attributes()['episodeLength']} mins';
+      return '${_attributes['episodeCount']} ${_attributes['subtype']} episodes @ ${_attributes['episodeLength']} mins';
     } catch (_) {
       return null;
     }
@@ -88,7 +132,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   String _timelineDetail() {
     try {
-      return '${_formatDate(_attributes()['startDate'])} till ${_formatDate(_attributes()['endDate'])}';
+      return '${_formatDate(_attributes['startDate'])} till ${_formatDate(_attributes['endDate'])}';
     } catch (_) {
       return null;
     }
@@ -96,7 +140,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   String _ratingGuide() {
     try {
-      return '${_attributes()['ageRatingGuide']}';
+      return '${_attributes['ageRatingGuide']}';
     } catch (_) {
       return null;
     }
@@ -104,7 +148,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   String _cover() {
     try {
-      return _attributes()['coverImage']['original'];
+      return _attributes['coverImage']['original'];
     } catch(_) {
       return null;
     }
@@ -112,7 +156,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   String _poster() {
     try {
-      return _attributes()['posterImage']['medium'];
+      return _attributes['posterImage']['medium'];
     } catch (_) {
       return null;
     }
@@ -120,7 +164,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   String _averageRating() {
     try {
-      return _attributes()['averageRating'];
+      return _attributes['averageRating'];
     } catch (_) {
       return null;
     }
@@ -128,7 +172,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   int _popularityRank() {
     try {
-      return _attributes()['popularityRank'];
+      return _attributes['popularityRank'];
     } catch (_) {
       return null;
     }
@@ -136,7 +180,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   int _ratingRank() {
     try {
-      return _attributes()['ratingRank'];
+      return _attributes['ratingRank'];
     } catch (_) {
       return null;
     }
@@ -153,6 +197,21 @@ class _MediaDetailState extends State<MediaDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    return _attributes == null
+        ? fetchingScaffold(context)
+        : contentScaffold(context);
+  }
+
+  Scaffold fetchingScaffold(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('Please wait ...', style: new TextStyle(fontFamily: 'Itim'),),
+      ),
+      body: new Center(),
+    );
+  }
+
+  Scaffold contentScaffold(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return new Scaffold(
       body: new CustomScrollView(
