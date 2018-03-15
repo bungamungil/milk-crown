@@ -170,6 +170,10 @@ class _MediaDetailState extends State<MediaDetailPage> {
                 fadeInDuration: new Duration(milliseconds: 0),
                 fadeOutDuration: new Duration(milliseconds: 0),
               ),
+              title: new Text(_canonicalTitle(),
+                style: new TextStyle(fontFamily: 'Itim'),
+              ),
+              centerTitle: true,
             ),
           ),
           new SliverList(
@@ -179,7 +183,7 @@ class _MediaDetailState extends State<MediaDetailPage> {
                 child: new Column(
                   children: <Widget>[
                     new Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         new Flexible(
                           child: new Padding(
@@ -192,20 +196,11 @@ class _MediaDetailState extends State<MediaDetailPage> {
                           ),
                           flex: 3,
                         ),
-                        new Expanded(
+                        new Flexible(
                           child: new Padding(
                             padding: new EdgeInsets.fromLTRB(0.0, 16.0, 16.0, 16.0),
                             child: new Column(
                               children: <Widget>[
-                                new Padding(padding: new EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 8.0),
-                                  child: new Text(_canonicalTitle(),
-                                    style: new TextStyle(
-                                        fontFamily: 'Delius',
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.w700
-                                    ),
-                                  ),
-                                ),
                                 new _MediaStatisticOverview(
                                     caption: 'Community Approval',
                                     value: '${_averageRating()}%',
@@ -225,7 +220,6 @@ class _MediaDetailState extends State<MediaDetailPage> {
                                     iconColor: Colors.orange
                                 ),
                               ],
-                              crossAxisAlignment: CrossAxisAlignment.start,
                             ),
                           ),
                           flex: 4,
@@ -354,38 +348,38 @@ class _MediaStatisticOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Padding(padding: new EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
-        child: new Row(
-          children: <Widget>[
-            new Padding(padding: new EdgeInsets.fromLTRB(4.0, 0.0, 12.0, 0.0),
-              child: new IconTheme(
-                data: new IconThemeData(
-                  color: iconColor,
-                  size: 24.0,
-                ),
-                child: new Icon(icon),
+    return new Padding(padding: new EdgeInsets.fromLTRB(8.0, 12.0, 8.0, 12.0),
+      child: new Row(
+        children: <Widget>[
+          new Padding(padding: new EdgeInsets.fromLTRB(4.0, 0.0, 12.0, 0.0),
+            child: new IconTheme(
+              data: new IconThemeData(
+                color: iconColor,
+                size: 24.0,
               ),
+              child: new Icon(icon),
             ),
-            new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Text(value,
-                  style: new TextStyle(
-                      fontFamily: 'Delius',
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w700
-                  ),
+          ),
+          new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              new Text(value,
+                style: new TextStyle(
+                    fontFamily: 'Delius',
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w700
                 ),
-                new Text(caption,
-                  style: new TextStyle(
-                      fontFamily: 'Delius',
-                      fontSize: 12.0
-                  ),
+              ),
+              new Text(caption,
+                style: new TextStyle(
+                    fontFamily: 'Delius',
+                    fontSize: 12.0
                 ),
-              ],
-            )
-          ],
-        )
+              ),
+            ],
+          )
+        ],
+      )
     );
   }
 
