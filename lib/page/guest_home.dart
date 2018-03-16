@@ -175,6 +175,7 @@ class _GuestHomeState extends State<GuestHomePage> {
         highestRated: _highestRated,
         mostPopular: _mostPopular,
         type: _exploreType,
+        key: '',
       ),
     );
   }

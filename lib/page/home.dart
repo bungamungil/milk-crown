@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'home_properties.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -17,22 +19,19 @@ class HomeState extends State<HomePage> with TickerProviderStateMixin {
 
   ValueKey<int> tabBarValueKey;
 
-  var _feedTabs = [
-    new Tab(text: 'Global',),
-    new Tab(text: 'Following',),
-  ];
-
-  var _findTabs = [
-    new Tab(text: 'Anime',),
-    new Tab(text: 'Manga',),
-    new Tab(text: 'User',),
-  ];
+  http.Client client = new http.Client();
 
   @override
   void initState() {
     super.initState();
-    _feedTabController = new TabController(length: _feedTabs.length, vsync: this);
-    _findTabController = new TabController(length: _findTabs.length, vsync: this);
+    _feedTabController = new TabController(length: feedTabs.length, vsync: this);
+    _findTabController = new TabController(length: findTabs.length, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    client.close();
+    super.dispose();
   }
 
   @override
@@ -47,33 +46,7 @@ class HomeState extends State<HomePage> with TickerProviderStateMixin {
           });
         },
         currentIndex: _selectedTab,
-        items: [
-          new BottomNavigationBarItem(
-            icon: new Icon(Icons.home),
-            title: new Text('Feed', style: new TextStyle(fontFamily: 'Itim'),),
-            backgroundColor: Colors.pink,
-          ),
-          new BottomNavigationBarItem(
-            icon: new Icon(Icons.search),
-            title: new Text('Find', style: new TextStyle(fontFamily: 'Itim'),),
-            backgroundColor: Colors.pink,
-          ),
-          new BottomNavigationBarItem(
-            icon: new Icon(Icons.update),
-            title: new Text('Update', style: new TextStyle(fontFamily: 'Itim'),),
-            backgroundColor: Colors.pink,
-          ),
-          new BottomNavigationBarItem(
-            icon: new Icon(Icons.face),
-            title: new Text('Profile', style: new TextStyle(fontFamily: 'Itim'),),
-            backgroundColor: Colors.pink,
-          ),
-          new BottomNavigationBarItem(
-            icon: new Icon(Icons.settings),
-            title: new Text('Setting', style: new TextStyle(fontFamily: 'Itim'),),
-            backgroundColor: Colors.pink,
-          ),
-        ],
+        items: bottomBarNavigationItems,
       ),
     );
   }
@@ -83,16 +56,20 @@ class HomeState extends State<HomePage> with TickerProviderStateMixin {
       case 0:
         return _feed();
       case 1:
-        return _find();
+        return _explore();
       default:
         return new Scaffold();
     }
   }
 
+  /*
+   *  Feed
+   */
+
   Scaffold _feed() => new Scaffold(
     appBar: new AppBar(
       title: new TabBar(
-        tabs: _feedTabs,
+        tabs: feedTabs,
         labelStyle: new TextStyle(fontFamily: 'Itim'),
         controller: _feedTabController,
       ),
@@ -109,43 +86,134 @@ class HomeState extends State<HomePage> with TickerProviderStateMixin {
     ], controller: _feedTabController,),
   );
 
-  Scaffold _find() => new Scaffold(
-    appBar: new AppBar(
-      title: new TabBar(
-        tabs: _findTabs,
-        labelStyle: new TextStyle(fontFamily: 'Itim'),
-        controller: _findTabController,
+
+  /*
+   *  Explore
+   */
+
+  Scaffold _explore() {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new TabBar(
+          tabs: findTabs,
+          labelStyle: new TextStyle(fontFamily: 'Itim'),
+          controller: _findTabController,
+        ),
+        actions: <Widget>[
+          new IconButton(icon: new Icon(Icons.search), onPressed: () {}),
+        ],
       ),
-      elevation: 0.0,
-    ),
-    body: new TabBarView(children: [
-      new Container(child: _findChild('Anime'),),
-      new Container(child: _findChild('Manga'),),
-      new Container(child: _findChild('User'),),
-    ], controller: _findTabController),
+      body: new TabBarView(children: [
+        new Container(child: _exploreChild('Anime'),),
+        new Container(child: _exploreChild('Manga'),),
+      ], controller: _findTabController),
+    );
+  }
+
+  Scaffold _exploreChild(String type) => new Scaffold(
+    body: _exploreChildContainer(type),
   );
 
-  Scaffold _findChild(String mediaType) => new Scaffold(
-    appBar: new AppBar(
-      title: new TextField(
-        decoration: new InputDecoration(
-          fillColor: Colors.white,
-          filled: true,
-          prefixIcon: new Icon(Icons.search),
-          hintText: 'Search $mediaType',
+  Widget _exploreChildContainer(String type) {
+    Widget child;
+    switch (type) {
+      case 'Anime':
+        return _exploreAnimeContainer();
+        break;
+      case 'Manga':
+        child = _exploreMangaContainer();
+        break;
+      default:
+        child = _exploreDummyContainer();
+      break;
+    }
+    return new Container(
+      key: new PageStorageKey('find_$type'),
+      child: child,
+    );
+  }
+
+  Widget _exploreAnimeContainer() {
+    return new ListView.builder(itemBuilder: _exploreAnimeContent, itemCount: 1,);
+  }
+
+  Widget _exploreMangaContainer() {
+    return new ListView.builder(itemBuilder: _exploreMangaContent, itemCount: 1,);
+  }
+
+  Widget _exploreDummyContainer() {
+    return new ListView.builder(itemBuilder: _dummyItem, itemCount: 200,);
+  }
+
+  Widget _exploreAnimeContent(BuildContext context, index) {
+    return new Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        new Padding(padding: new EdgeInsets.all(10.0),
+          child: new Text('Trending This Week', style: new TextStyle(
+            fontFamily: 'Delius',
+            fontWeight: FontWeight.w700,
+          ),),
         ),
-        style: new TextStyle(
-          fontFamily: 'Delius',
-          color: Colors.pink,
-          fontSize: 16.0,
+        new Padding(padding: new EdgeInsets.all(10.0),
+          child: new Text('Top Airing', style: new TextStyle(
+            fontFamily: 'Delius',
+            fontWeight: FontWeight.w700,
+          ),),
         ),
-      ),
-    ),
-    body: new Container(
-      key: new PageStorageKey('find_$mediaType'),
-      child: new ListView.builder(itemBuilder: _dummyItem, itemCount: 200,),
-    ),
-  );
+        new Padding(padding: new EdgeInsets.all(10.0),
+          child: new Text('Top Upcoming', style: new TextStyle(
+            fontFamily: 'Delius',
+            fontWeight: FontWeight.w700,
+          ),),
+        ),
+        new Padding(padding: new EdgeInsets.all(10.0),
+          child: new Text('Highest Rated', style: new TextStyle(
+            fontFamily: 'Delius',
+            fontWeight: FontWeight.w700,
+          ),),
+        ),
+        new Padding(padding: new EdgeInsets.all(10.0),
+          child: new Text('Most Popular', style: new TextStyle(
+            fontFamily: 'Delius',
+            fontWeight: FontWeight.w700,
+          ),),
+        ),
+      ],
+    );
+  }
+
+  Widget _exploreMangaContent(BuildContext context, index) {
+    return new Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        new Padding(padding: new EdgeInsets.all(10.0),
+          child: new Text('Trending This Week', style: new TextStyle(
+            fontFamily: 'Delius',
+            fontWeight: FontWeight.w700,
+          ),),
+        ),
+        new Padding(padding: new EdgeInsets.all(10.0),
+          child: new Text('Top Publishing', style: new TextStyle(
+            fontFamily: 'Delius',
+            fontWeight: FontWeight.w700,
+          ),),
+        ),
+        new Padding(padding: new EdgeInsets.all(10.0),
+          child: new Text('Highest Rated', style: new TextStyle(
+            fontFamily: 'Delius',
+            fontWeight: FontWeight.w700,
+          ),),
+        ),
+        new Padding(padding: new EdgeInsets.all(10.0),
+          child: new Text('Most Popular', style: new TextStyle(
+            fontFamily: 'Delius',
+            fontWeight: FontWeight.w700,
+          ),),
+        ),
+      ],
+    );
+  }
 
   Widget _dummyItem(BuildContext context, int index) {
     return new ListTile(

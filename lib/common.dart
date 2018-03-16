@@ -10,7 +10,6 @@ SliverList createTitle(String title) {
         child: new Text(title,
           style: new TextStyle(
             fontFamily: 'Delius',
-            fontSize: 20.0,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -21,7 +20,7 @@ SliverList createTitle(String title) {
 
 SliverGridDelegateWithFixedCrossAxisCount defaultGridDelegate() {
   return new SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: 2,
+    crossAxisCount: 4,
     childAspectRatio: 3 / 4,
   );
 }

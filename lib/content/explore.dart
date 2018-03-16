@@ -12,7 +12,8 @@ class ExploreWidget extends StatelessWidget {
     @required this.highestRated,
     @required this.mostPopular,
     @required this.type,
-  });
+    @required key,
+  }) : super(key: key);
 
   final List<Map> trending;
 
@@ -57,7 +58,7 @@ class ExploreWidget extends StatelessWidget {
               media: getItem(from: trending, index: index),
               padding: _defaultItemPadding(index),
             );
-          }, childCount: 6),
+          }, childCount: 8),
           gridDelegate: defaultGridDelegate(),
         ),
         createTitle('Top $currentTitle'),
@@ -68,7 +69,7 @@ class ExploreWidget extends StatelessWidget {
               media: getItem(from: topAiring, index: index),
               padding: _defaultItemPadding(index),
             );
-          }, childCount: 6),
+          }, childCount: 8),
         ),
         type == 'manga' ? container() : createTitle('Top Upcoming $title'),
         type == 'manga' ? container() : new SliverGrid(
@@ -78,7 +79,7 @@ class ExploreWidget extends StatelessWidget {
               media: getItem(from: topUpcoming, index: index),
               padding: _defaultItemPadding(index),
             );
-          }, childCount: 6),
+          }, childCount: 8),
         ),
         createTitle('Highest Rated $title'),
         new SliverGrid(
@@ -88,7 +89,7 @@ class ExploreWidget extends StatelessWidget {
               media: getItem(from: highestRated, index: index),
               padding: _defaultItemPadding(index),
             );
-          }, childCount: 6),
+          }, childCount: 8),
         ),
         createTitle('Most Popular $title'),
         new SliverGrid(
@@ -98,7 +99,7 @@ class ExploreWidget extends StatelessWidget {
               media: getItem(from: mostPopular, index: index),
               padding: _defaultItemPadding(index),
             );
-          }, childCount: 6),
+          }, childCount: 8),
         ),
         new SliverList(
           delegate: new SliverChildBuilderDelegate((buildContext, index) {
