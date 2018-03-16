@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:milk_crown/page/guest_home.dart';
+import 'package:milk_crown/page/home.dart';
 import 'package:milk_crown/page/login.dart';
 import 'package:milk_crown/page/library/anime_library.dart';
 import 'package:milk_crown/page/library/manga_library.dart';
@@ -24,10 +25,10 @@ class MilkCrown extends StatelessWidget {
     return new MaterialApp(
       title: 'Milk Crown',
       theme: new ThemeData(
-        primarySwatch: Colors.brown,
+        primarySwatch: Colors.pink,
         platform: TargetPlatform.iOS,
       ),
-      home: new GuestHomePage(),
+      home: new HomePage(),
       routes: routes(context),
     );
   }
